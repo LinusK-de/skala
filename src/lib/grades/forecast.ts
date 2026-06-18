@@ -32,14 +32,20 @@ export function requiredNextGrade(
   const required = (target * (totalWeight + nextWeight) - weightedSum) / nextWeight;
   const spec = scaleSpec(scale);
 
+  // Compare against the best/worst mark a student can ACTUALLY score, not the
+  // integer endpoints: on the grade scale a 1+ averages as 0.7, so a target
+  // needing a 1+ is reachable, not "impossible".
+  const bestAttainable = toAveragingValue(scale, spec.best, spec.betterIsLower ? -1 : null);
+  const worstAttainable = toAveragingValue(scale, spec.worst, null);
+
   if (spec.betterIsLower) {
     // Lower is better: the next mark must be `required` or better (smaller).
-    if (required >= spec.worst) return { kind: 'secure' };
-    if (required < spec.best) return { kind: 'impossible' };
+    if (required >= worstAttainable) return { kind: 'secure' };
+    if (required < bestAttainable) return { kind: 'impossible' };
   } else {
     // Higher is better: the next mark must be `required` or more points.
-    if (required <= spec.worst) return { kind: 'secure' };
-    if (required > spec.best) return { kind: 'impossible' };
+    if (required <= worstAttainable) return { kind: 'secure' };
+    if (required > bestAttainable) return { kind: 'impossible' };
   }
   return { kind: 'reachable', required };
 }

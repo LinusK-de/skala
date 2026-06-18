@@ -65,13 +65,19 @@ export default function MehrScreen() {
 
         <Card>
           <Text style={[styles.cardTitle, { color: colors.text }]}>Schullaufbahn</Text>
-          {stages.map((s) => {
+          {stages.map((s, i) => {
             const isCurrent = currentStage?.id === s.id;
             return (
               <Pressable
                 key={s.id}
                 onPress={() => router.push(`/stage/${s.id}`)}
-                style={[styles.row, { borderBottomColor: colors.border }]}
+                style={[
+                  styles.row,
+                  i < stages.length - 1 && {
+                    borderBottomWidth: StyleSheet.hairlineWidth,
+                    borderBottomColor: colors.border,
+                  },
+                ]}
               >
                 <View style={styles.rowLeft}>
                   {isCurrent ? (
@@ -102,7 +108,14 @@ export default function MehrScreen() {
           <Text style={[styles.muted, { color: colors.textMuted }]}>
             Deine Noten liegen nur auf diesem Gerät. Exportiere regelmäßig ein Backup.
           </Text>
-          <PrimaryButton label="Backup exportieren" onPress={() => void exportBackup()} />
+          <PrimaryButton
+            label="Backup exportieren"
+            onPress={() => {
+              void exportBackup().then((ok) => {
+                if (!ok) Alert.alert('Fehler', 'Das Backup konnte nicht erstellt werden.');
+              });
+            }}
+          />
           <PrimaryButton label="Backup importieren" variant="muted" onPress={runImport} />
           {busy ? (
             <Text style={[styles.muted, { color: colors.textMuted }]}>Einen Moment …</Text>
@@ -162,7 +175,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
   },
   rowLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   dot: { width: 8, height: 8, borderRadius: 4 },

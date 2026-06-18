@@ -7,30 +7,38 @@ import {
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, useColorScheme, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { UndoProvider } from '@/components/UndoSnackbar';
+import { palettes } from '@/constants/theme';
 import { stagesQuery, useDatabaseMigrations, useLiveQuery } from '@/db';
+import { PurchaseProvider } from '@/hooks/usePurchase';
 import { ThemeProvider, useTheme } from '@/hooks/useTheme';
 
 export default function RootLayout() {
   // Run pending migrations before the app touches the database. Gate the UI on success.
   const { success, error } = useDatabaseMigrations();
+  // These gate screens render BEFORE ThemeProvider (which itself reads the DB), so
+  // theme them from the system scheme directly — no DB dependency.
+  const systemScheme = useColorScheme();
+  const colors = palettes[systemScheme === 'dark' ? 'dark' : 'light'];
 
   if (error) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.error}>Datenbank-Migration fehlgeschlagen: {error.message}</Text>
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <Text style={[styles.error, { color: colors.warning }]}>
+          Datenbank-Migration fehlgeschlagen: {error.message}
+        </Text>
       </View>
     );
   }
 
   if (!success) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator />
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <ActivityIndicator color={colors.tint} />
       </View>
     );
   }
@@ -39,9 +47,11 @@ export default function RootLayout() {
     <GestureHandlerRootView style={styles.flex}>
       <ThemeProvider>
         <SafeAreaProvider>
-          <UndoProvider>
-            <ThemedNavigation />
-          </UndoProvider>
+          <PurchaseProvider>
+            <UndoProvider>
+              <ThemedNavigation />
+            </UndoProvider>
+          </PurchaseProvider>
         </SafeAreaProvider>
       </ThemeProvider>
     </GestureHandlerRootView>
@@ -114,5 +124,5 @@ function ThemedNavigation() {
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
-  error: { color: '#b00020', textAlign: 'center' },
+  error: { textAlign: 'center' },
 });

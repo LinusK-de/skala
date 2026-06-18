@@ -4,6 +4,8 @@
  * between a lost phone and years of lost grades — so it ships free. Timestamps
  * are stored as epoch-ms numbers to survive the JSON round-trip.
  */
+import { eq } from 'drizzle-orm';
+
 import { ensureCurrentTerm } from './career';
 import { db } from './client';
 import { gradeCategories, grades, stages, subjects, terms } from './schema';
@@ -170,7 +172,7 @@ export function isBackupData(value: unknown): value is BackupData {
   if (typeof value !== 'object' || value === null) return false;
   const v = value as Record<string, unknown>;
   return (
-    typeof v.version === 'number' &&
+    v.version === BACKUP_VERSION &&
     Array.isArray(v.stages) &&
     Array.isArray(v.terms) &&
     Array.isArray(v.subjects) &&
@@ -225,6 +227,12 @@ export function restoreDatabase(data: BackupData): void {
         .values({ ...g, date: new Date(g.date), createdAt: new Date(g.createdAt) })
         .run(),
     );
+
+    // Make restore authoritative against the file: at most one current term.
+    const chosen = data.terms.find((t) => t.isCurrent);
+    tx.update(terms).set({ isCurrent: false }).run();
+    if (chosen) tx.update(terms).set({ isCurrent: true }).where(eq(terms.id, chosen.id)).run();
   });
+  // Covers the case where the file had terms but none flagged current.
   ensureCurrentTerm();
 }

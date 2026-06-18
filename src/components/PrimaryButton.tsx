@@ -12,21 +12,27 @@ export function PrimaryButton({
   label,
   onPress,
   variant = 'primary',
+  disabled = false,
 }: {
   label: string;
   onPress: () => void;
   variant?: 'primary' | 'muted';
+  disabled?: boolean;
 }) {
   const { colors } = useTheme();
   const bg = variant === 'primary' ? colors.tint : colors.surfaceMuted;
   const fg = variant === 'primary' ? colors.tintText : colors.text;
   return (
     <Pressable
+      disabled={disabled}
       onPress={() => {
         void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
         onPress();
       }}
-      style={({ pressed }) => [styles.button, { backgroundColor: bg, opacity: pressed ? 0.85 : 1 }]}
+      style={({ pressed }) => [
+        styles.button,
+        { backgroundColor: bg, opacity: disabled ? 0.4 : pressed ? 0.85 : 1 },
+      ]}
     >
       <Text style={[styles.label, { color: fg }]}>{label}</Text>
     </Pressable>

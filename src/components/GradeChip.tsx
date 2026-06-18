@@ -19,11 +19,14 @@ export function GradeChip({
   size?: 'sm' | 'md' | 'lg';
   style?: ViewStyle;
 }) {
-  const { colors } = useTheme();
+  const { colors, scheme } = useTheme();
+  // Sentiment fills are dark in light mode (white text reads well) but PALE in
+  // dark mode, where white would fail contrast — use the dark ink there instead.
+  const onFill = scheme === 'dark' ? colors.tintText : '#FFFFFF';
   const palette: Record<Sentiment, { bg: string; fg: string }> = {
-    positive: { bg: colors.positive, fg: '#FFFFFF' },
+    positive: { bg: colors.positive, fg: onFill },
     neutral: { bg: colors.surfaceMuted, fg: colors.text },
-    warning: { bg: colors.warning, fg: '#FFFFFF' },
+    warning: { bg: colors.warning, fg: onFill },
   };
   const { bg, fg } = palette[sentiment];
   const dims = SIZES[size];

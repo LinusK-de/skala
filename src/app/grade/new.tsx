@@ -105,17 +105,19 @@ export default function NewGradeScreen() {
         )}
       </ScrollView>
 
-      <View
-        style={[
-          styles.footer,
-          { paddingBottom: insets.bottom + 12, borderTopColor: colors.border },
-        ]}
-      >
-        <PrimaryButton label="Sichern" onPress={save} />
-        {!canSave ? (
-          <Text style={[styles.hint, { color: colors.textMuted }]}>Tippe eine Note an.</Text>
-        ) : null}
-      </View>
+      {subjects.length > 0 ? (
+        <View
+          style={[
+            styles.footer,
+            { paddingBottom: insets.bottom + 12, borderTopColor: colors.border },
+          ]}
+        >
+          <PrimaryButton label="Sichern" onPress={save} />
+          {!canSave ? (
+            <Text style={[styles.hint, { color: colors.textMuted }]}>Tippe eine Note an.</Text>
+          ) : null}
+        </View>
+      ) : null}
     </KeyboardAvoidingView>
   );
 }

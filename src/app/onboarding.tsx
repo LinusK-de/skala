@@ -243,7 +243,12 @@ export default function OnboardingScreen() {
         <View style={styles.footerPrimary}>
           <PrimaryButton
             label={step === 2 ? 'Fertig' : 'Weiter'}
-            onPress={() => (step === 2 ? finish() : canContinue && setStep((s) => s + 1))}
+            disabled={!canContinue}
+            onPress={() => {
+              if (!canContinue) return;
+              if (step === 2) finish();
+              else setStep((s) => s + 1);
+            }}
           />
         </View>
       </View>

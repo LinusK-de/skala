@@ -254,12 +254,18 @@ export default function SubjectDetailScreen() {
         {isPro ? (
           <Card>
             <Text style={[styles.cardTitle, { color: colors.text }]}>Notenverteilung</Text>
-            <DistributionChart
-              bars={gradeDistribution(
-                detail.allGrades.map((g) => g.value),
-                scale,
-              )}
-            />
+            {detail.allGrades.length === 0 ? (
+              <Text style={[styles.muted, { color: colors.textMuted }]}>
+                Noch keine Noten in diesem Fach.
+              </Text>
+            ) : (
+              <DistributionChart
+                bars={gradeDistribution(
+                  detail.allGrades.map((g) => g.value),
+                  scale,
+                )}
+              />
+            )}
           </Card>
         ) : (
           <LockedCard
@@ -380,11 +386,10 @@ function forecastText(forecast: ForecastResult | null, scale: Scale): string {
   if (forecast.kind === 'secure') return 'Dein Ziel ist bereits sicher.';
   if (forecast.kind === 'impossible')
     return 'Mit der nächsten Note ist dein Ziel nicht mehr erreichbar.';
-  const needed =
-    scale === 'points_0_15'
-      ? `${Math.ceil(forecast.required)} Punkte`
-      : decimalToGradeLabel(forecast.required);
-  return `In der nächsten Note brauchst du mindestens eine ${needed}.`;
+  if (scale === 'points_0_15') {
+    return `In der nächsten Note brauchst du mindestens ${Math.ceil(forecast.required)} Punkte.`;
+  }
+  return `In der nächsten Note brauchst du mindestens eine ${decimalToGradeLabel(forecast.required)}.`;
 }
 
 const styles = StyleSheet.create({
