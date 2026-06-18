@@ -31,8 +31,8 @@ export interface GradeInput {
   tendency: Tendency | null;
   /** Per-grade weight on top of the category weight (default 1). */
   weight: number;
-  /** Which category this grade belongs to. */
-  categoryId: number;
+  /** Which category this grade belongs to; `null` if its category was removed. */
+  categoryId: number | null;
   /** A grade the student logged but excluded from the average. */
   countsTowardAverage: boolean;
 }
@@ -48,7 +48,7 @@ export interface CategoryInput {
 
 /** Per-category sub-average, surfaced in the UI ("Klassenarbeiten Ø 2,3"). */
 export interface CategoryAverage {
-  categoryId: number;
+  categoryId: number | null;
   avg: number;
   count: number;
 }

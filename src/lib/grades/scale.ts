@@ -73,11 +73,7 @@ export function scaleSpec(scale: Scale): ScaleSpec {
  *  - grades → the 1.0–6.0 decimal (tendency applied)
  *  - points → the raw points
  */
-export function toAveragingValue(
-  scale: Scale,
-  value: number,
-  tendency: Tendency | null,
-): number {
+export function toAveragingValue(scale: Scale, value: number, tendency: Tendency | null): number {
   return scale === 'points_0_15' ? value : tendencyToDecimal(value, tendency);
 }
 

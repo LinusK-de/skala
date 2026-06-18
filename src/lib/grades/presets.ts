@@ -28,14 +28,70 @@ export interface SchoolTypePreset {
 
 /** Order = the order shown in onboarding. */
 export const SCHOOL_TYPES: readonly SchoolTypePreset[] = [
-  { type: 'grundschule', label: 'Grundschule', scale: 'grades_1_6', gradeFrom: 1, gradeTo: 4, stageName: 'Grundschule' },
-  { type: 'realschule', label: 'Realschule', scale: 'grades_1_6', gradeFrom: 5, gradeTo: 10, stageName: 'Realschule' },
-  { type: 'hauptschule', label: 'Haupt-/Mittelschule', scale: 'grades_1_6', gradeFrom: 5, gradeTo: 9, stageName: 'Mittelschule' },
-  { type: 'gesamtschule', label: 'Gesamtschule', scale: 'grades_1_6', gradeFrom: 5, gradeTo: 10, stageName: 'Gesamtschule' },
-  { type: 'gymnasium_sek1', label: 'Gymnasium (Unter-/Mittelstufe)', scale: 'grades_1_6', gradeFrom: 5, gradeTo: 10, stageName: 'Gymnasium' },
-  { type: 'oberstufe', label: 'Gymnasiale Oberstufe', scale: 'points_0_15', gradeFrom: 11, gradeTo: 13, stageName: 'Oberstufe' },
-  { type: 'berufsschule', label: 'Berufsschule / FOS', scale: 'grades_1_6', gradeFrom: 11, gradeTo: 13, stageName: 'Berufsschule' },
-  { type: 'custom', label: 'Andere', scale: 'grades_1_6', gradeFrom: 5, gradeTo: 12, stageName: 'Schule' },
+  {
+    type: 'grundschule',
+    label: 'Grundschule',
+    scale: 'grades_1_6',
+    gradeFrom: 1,
+    gradeTo: 4,
+    stageName: 'Grundschule',
+  },
+  {
+    type: 'realschule',
+    label: 'Realschule',
+    scale: 'grades_1_6',
+    gradeFrom: 5,
+    gradeTo: 10,
+    stageName: 'Realschule',
+  },
+  {
+    type: 'hauptschule',
+    label: 'Haupt-/Mittelschule',
+    scale: 'grades_1_6',
+    gradeFrom: 5,
+    gradeTo: 9,
+    stageName: 'Mittelschule',
+  },
+  {
+    type: 'gesamtschule',
+    label: 'Gesamtschule',
+    scale: 'grades_1_6',
+    gradeFrom: 5,
+    gradeTo: 10,
+    stageName: 'Gesamtschule',
+  },
+  {
+    type: 'gymnasium_sek1',
+    label: 'Gymnasium (Unter-/Mittelstufe)',
+    scale: 'grades_1_6',
+    gradeFrom: 5,
+    gradeTo: 10,
+    stageName: 'Gymnasium',
+  },
+  {
+    type: 'oberstufe',
+    label: 'Gymnasiale Oberstufe',
+    scale: 'points_0_15',
+    gradeFrom: 11,
+    gradeTo: 13,
+    stageName: 'Oberstufe',
+  },
+  {
+    type: 'berufsschule',
+    label: 'Berufsschule / FOS',
+    scale: 'grades_1_6',
+    gradeFrom: 11,
+    gradeTo: 13,
+    stageName: 'Berufsschule',
+  },
+  {
+    type: 'custom',
+    label: 'Andere',
+    scale: 'grades_1_6',
+    gradeFrom: 5,
+    gradeTo: 12,
+    stageName: 'Schule',
+  },
 ];
 
 export function schoolTypePreset(type: SchoolType): SchoolTypePreset {
@@ -47,15 +103,37 @@ export function schoolTypeToScale(type: SchoolType): Scale {
 }
 
 const SEK1_SUBJECTS = [
-  'Deutsch', 'Mathematik', 'Englisch', 'Biologie', 'Chemie', 'Physik',
-  'Geschichte', 'Erdkunde', 'Politik', 'Sport', 'Kunst', 'Musik',
-  'Religion', 'Französisch', 'Informatik',
+  'Deutsch',
+  'Mathematik',
+  'Englisch',
+  'Biologie',
+  'Chemie',
+  'Physik',
+  'Geschichte',
+  'Erdkunde',
+  'Politik',
+  'Sport',
+  'Kunst',
+  'Musik',
+  'Religion',
+  'Französisch',
+  'Informatik',
 ];
 
 const OBERSTUFE_SUBJECTS = [
-  'Deutsch', 'Mathematik', 'Englisch', 'Biologie', 'Chemie', 'Physik',
-  'Geschichte', 'Geographie', 'Politik & Wirtschaft', 'Sport', 'Kunst',
-  'Informatik', 'Französisch',
+  'Deutsch',
+  'Mathematik',
+  'Englisch',
+  'Biologie',
+  'Chemie',
+  'Physik',
+  'Geschichte',
+  'Geographie',
+  'Politik & Wirtschaft',
+  'Sport',
+  'Kunst',
+  'Informatik',
+  'Französisch',
 ];
 
 /** A sensible pre-checked subject list for the chosen school type. */
@@ -64,8 +142,13 @@ export function defaultSubjectsFor(type: SchoolType): string[] {
 }
 
 const CORE_SUBJECTS = new Set([
-  'deutsch', 'mathematik', 'mathe', 'englisch',
-  'französisch', 'latein', 'spanisch',
+  'deutsch',
+  'mathematik',
+  'mathe',
+  'englisch',
+  'französisch',
+  'latein',
+  'spanisch',
 ]);
 
 /** Kernfach? Drives the schriftlich-heavier default weighting. */

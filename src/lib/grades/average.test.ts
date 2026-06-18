@@ -42,8 +42,14 @@ describe('weightedAverage', () => {
 describe('subjectAverage — two-level weighting', () => {
   it('does not let six small oral marks drown two Klausuren', () => {
     const grades = [
-      grade(1, 1), grade(1, 1), // two Klausuren = 1.0
-      grade(3, 2), grade(3, 2), grade(3, 2), grade(3, 2), grade(3, 2), grade(3, 2), // six mündlich = 3.0
+      grade(1, 1),
+      grade(1, 1), // two Klausuren = 1.0
+      grade(3, 2),
+      grade(3, 2),
+      grade(3, 2),
+      grade(3, 2),
+      grade(3, 2),
+      grade(3, 2), // six mündlich = 3.0
     ];
     const r = subjectAverage(grades, [WRITTEN, ORAL], 1, 1, 'grades_1_6');
     expect(r.kind).toBe('value');
@@ -85,9 +91,9 @@ describe('subjectAverage — two-level weighting', () => {
 
   it('is empty with no counting grades', () => {
     expect(subjectAverage([], [WRITTEN], 1, 1, 'grades_1_6')).toEqual({ kind: 'empty' });
-    expect(
-      subjectAverage([grade(2, 1, { counts: false })], [WRITTEN], 1, 1, 'grades_1_6'),
-    ).toEqual({ kind: 'empty' });
+    expect(subjectAverage([grade(2, 1, { counts: false })], [WRITTEN], 1, 1, 'grades_1_6')).toEqual(
+      { kind: 'empty' },
+    );
   });
 });
 

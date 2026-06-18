@@ -68,7 +68,7 @@ export function subjectAverage(
   const categoryById = new Map(categories.map((c) => [c.id, c]));
 
   // Level 1: per-category averages over the counting grades.
-  const gradesByCategory = new Map<number, GradeInput[]>();
+  const gradesByCategory = new Map<number | null, GradeInput[]>();
   for (const grade of grades) {
     if (!grade.countsTowardAverage) continue;
     const list = gradesByCategory.get(grade.categoryId);
@@ -90,7 +90,7 @@ export function subjectAverage(
 
     categoryAverages.push({ categoryId, avg: result.avg, count: categoryGrades.length });
 
-    const category = categoryById.get(categoryId);
+    const category = categoryId === null ? undefined : categoryById.get(categoryId);
     const block = category ? blockOf(category.type) : 'oral';
     const categoryWeight = category ? category.weight : 1;
     blockItems[block].push({ value: result.avg, weight: categoryWeight });
@@ -110,7 +110,8 @@ export function subjectAverage(
   const safeWritten = writtenWeight > 0 || oralWeight > 0 ? writtenWeight : 1;
   const safeOral = writtenWeight > 0 || oralWeight > 0 ? oralWeight : 1;
   const subjectItems: WeightedItem[] = [];
-  if (blocks.written !== undefined) subjectItems.push({ value: blocks.written, weight: safeWritten });
+  if (blocks.written !== undefined)
+    subjectItems.push({ value: blocks.written, weight: safeWritten });
   if (blocks.oral !== undefined) subjectItems.push({ value: blocks.oral, weight: safeOral });
 
   let combined = weightedAverage(subjectItems);

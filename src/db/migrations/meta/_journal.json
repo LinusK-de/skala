@@ -8,6 +8,13 @@
       "when": 1781627504237,
       "tag": "0000_outstanding_kang",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1781818917465,
+      "tag": "0001_loving_kronos",
+      "breakpoints": true
     }
   ]
 }

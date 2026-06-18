@@ -2,9 +2,22 @@ import { gradeToPoints, pointsToGrade } from './points';
 
 describe('pointsToGrade (KMK table)', () => {
   const table: [number, number][] = [
-    [15, 0.7], [14, 1.0], [13, 1.3], [12, 1.7], [11, 2.0], [10, 2.3],
-    [9, 2.7], [8, 3.0], [7, 3.3], [6, 3.7], [5, 4.0], [4, 4.3],
-    [3, 4.7], [2, 5.0], [1, 5.3], [0, 6.0],
+    [15, 0.7],
+    [14, 1.0],
+    [13, 1.3],
+    [12, 1.7],
+    [11, 2.0],
+    [10, 2.3],
+    [9, 2.7],
+    [8, 3.0],
+    [7, 3.3],
+    [6, 3.7],
+    [5, 4.0],
+    [4, 4.3],
+    [3, 4.7],
+    [2, 5.0],
+    [1, 5.3],
+    [0, 6.0],
   ];
 
   it.each(table)('%s points → grade %s', (points, grade) => {
@@ -34,7 +47,11 @@ describe('pointsToGrade (KMK table)', () => {
 
 describe('gradeToPoints (inverse)', () => {
   it.each([
-    [1.0, 14], [2.0, 11], [4.0, 5], [6.0, 0], [0.7, 15],
+    [1.0, 14],
+    [2.0, 11],
+    [4.0, 5],
+    [6.0, 0],
+    [0.7, 15],
   ])('grade %s → %s points', (grade, points) => {
     expect(gradeToPoints(grade)).toBeCloseTo(points, 5);
   });

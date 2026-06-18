@@ -9,11 +9,7 @@ import { tendencyToDecimal } from './tendency';
 import type { Scale, Tendency } from './types';
 
 /** One grade's value on the unified 1.0–6.0 axis. */
-export function normalizeToDecimal(
-  value: number,
-  tendency: Tendency | null,
-  scale: Scale,
-): number {
+export function normalizeToDecimal(value: number, tendency: Tendency | null, scale: Scale): number {
   return scale === 'points_0_15' ? pointsToGrade(value) : tendencyToDecimal(value, tendency);
 }
 
