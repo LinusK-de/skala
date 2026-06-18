@@ -9,6 +9,9 @@ import { and, asc, desc, eq, isNull } from 'drizzle-orm';
 import { db } from './client';
 import { gradeCategories, grades, stages, subjects, terms } from './schema';
 
+// The React adapter lives behind the db seam so hooks never import drizzle directly.
+export { useLiveQuery } from 'drizzle-orm/expo-sqlite';
+
 export const stagesQuery = () => db.select().from(stages).orderBy(asc(stages.sortOrder));
 
 export const allTermsQuery = () => db.select().from(terms).orderBy(asc(terms.sortOrder));
@@ -42,3 +45,11 @@ export const gradesForTermQuery = (termId: number) =>
 
 export const gradesForSubjectQuery = (subjectId: number) =>
   db.select().from(grades).where(eq(grades.subjectId, subjectId)).orderBy(desc(grades.date));
+
+// Whole-table queries powering the career overview (everything in memory; the
+// per-student data set is small). Includes archived subjects for historical math.
+export const allSubjectsQuery = () => db.select().from(subjects).orderBy(asc(subjects.sortOrder));
+
+export const allCategoriesQuery = () => db.select().from(gradeCategories);
+
+export const allGradesQuery = () => db.select().from(grades);

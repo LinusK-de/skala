@@ -69,8 +69,9 @@ export {
 // Backup / restore.
 export { serializeDatabase, restoreDatabase, isBackupData, type BackupData } from './backup';
 
-// Reactive query factories (for useLiveQuery in hooks).
+// Reactive query factories + the useLiveQuery adapter (for hooks).
 export {
+  useLiveQuery,
   stagesQuery,
   allTermsQuery,
   termsForStageQuery,
@@ -81,4 +82,7 @@ export {
   categoriesQuery,
   gradesForTermQuery,
   gradesForSubjectQuery,
+  allSubjectsQuery,
+  allCategoriesQuery,
+  allGradesQuery,
 } from './live';
