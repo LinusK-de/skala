@@ -1,0 +1,23 @@
+version: 2
+updates:
+  # Keep npm dependencies current. Expo/React Native packages are grouped so SDK
+  # bumps arrive as one reviewable PR — never merge an Expo bump without checking
+  # it against the Expo Go SDK (see AGENTS.md).
+  - package-ecosystem: npm
+    directory: '/'
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      expo:
+        patterns:
+          - 'expo'
+          - 'expo-*'
+          - 'react-native'
+          - 'react-native-*'
+  # Keep the GitHub Actions in our workflows up to date (this is what flags the
+  # next actions/checkout deprecation before it bites).
+  - package-ecosystem: github-actions
+    directory: '/'
+    schedule:
+      interval: weekly
