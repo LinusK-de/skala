@@ -2,8 +2,16 @@
 export * from './types';
 export { tendencyToDecimal, decimalToGradeLabel } from './tendency';
 export { pointsToGrade, gradeToPoints } from './points';
-export { scaleSpec, toAveragingValue, isBetter, gradeLabel, type ScaleSpec } from './scale';
+export {
+  scaleSpec,
+  toAveragingValue,
+  isBetter,
+  gradeLabel,
+  chartConfig,
+  type ScaleSpec,
+} from './scale';
 export { sentimentFor, type Sentiment } from './sentiment';
+export { gradeDistribution, type DistributionBucket } from './distribution';
 export {
   weightedAverage,
   meanOf,

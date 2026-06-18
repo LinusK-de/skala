@@ -4,12 +4,15 @@ import {
   ThemeProvider as NavThemeProvider,
   type Theme,
 } from '@react-navigation/native';
-import { Stack } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { useEffect } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { useDatabaseMigrations } from '@/db';
+import { UndoProvider } from '@/components/UndoSnackbar';
+import { stagesQuery, useDatabaseMigrations, useLiveQuery } from '@/db';
 import { ThemeProvider, useTheme } from '@/hooks/useTheme';
 
 export default function RootLayout() {
@@ -19,7 +22,7 @@ export default function RootLayout() {
   if (error) {
     return (
       <View style={styles.center}>
-        <Text style={styles.error}>Database migration failed: {error.message}</Text>
+        <Text style={styles.error}>Datenbank-Migration fehlgeschlagen: {error.message}</Text>
       </View>
     );
   }
@@ -33,12 +36,31 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider>
-      <SafeAreaProvider>
-        <ThemedNavigation />
-      </SafeAreaProvider>
-    </ThemeProvider>
+    <GestureHandlerRootView style={styles.flex}>
+      <ThemeProvider>
+        <SafeAreaProvider>
+          <UndoProvider>
+            <ThemedNavigation />
+          </UndoProvider>
+        </SafeAreaProvider>
+      </ThemeProvider>
+    </GestureHandlerRootView>
   );
+}
+
+/** Sends a first-run user (no stages yet) to onboarding. Returns nothing visible. */
+function RouteGuard() {
+  const router = useRouter();
+  const segments = useSegments();
+  const { data } = useLiveQuery(stagesQuery());
+
+  useEffect(() => {
+    if (data === undefined) return; // still loading
+    const inOnboarding = segments[0] === 'onboarding';
+    if (data.length === 0 && !inOnboarding) router.replace('/onboarding');
+  }, [data, segments, router]);
+
+  return null;
 }
 
 // Bridges our theme into React Navigation so the navigator chrome and status bar follow it too.
@@ -60,8 +82,26 @@ function ThemedNavigation() {
   return (
     <NavThemeProvider value={navTheme}>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
-      <Stack screenOptions={{ headerShown: false }}>
+      <RouteGuard />
+      <Stack
+        screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}
+      >
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="onboarding" options={{ gestureEnabled: false }} />
+        <Stack.Screen name="subject/[id]" options={{ headerShown: true, title: 'Fach' }} />
+        <Stack.Screen
+          name="grade/new"
+          options={{ headerShown: true, presentation: 'modal', title: 'Note eintragen' }}
+        />
+        <Stack.Screen
+          name="grade/[id]"
+          options={{ headerShown: true, presentation: 'modal', title: 'Note bearbeiten' }}
+        />
+        <Stack.Screen
+          name="stage/new"
+          options={{ headerShown: true, presentation: 'modal', title: 'Neuer Abschnitt' }}
+        />
+        <Stack.Screen name="stage/[id]" options={{ headerShown: true, title: 'Abschnitt' }} />
         <Stack.Screen
           name="paywall"
           options={{ headerShown: true, presentation: 'modal', title: 'Pro' }}
@@ -72,6 +112,7 @@ function ThemedNavigation() {
 }
 
 const styles = StyleSheet.create({
+  flex: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
   error: { color: '#b00020', textAlign: 'center' },
 });

@@ -88,3 +88,19 @@ export function gradeLabel(value: number, tendency: Tendency | null, scale: Scal
   const suffix = tendency === -1 ? '+' : tendency === 1 ? '-' : '';
   return `${value}${suffix}`;
 }
+
+/** Axis configuration for the charts (domain, gridline ticks, orientation). */
+export function chartConfig(scale: Scale): {
+  min: number;
+  max: number;
+  ticks: number[];
+  betterIsLower: boolean;
+} {
+  const spec = scaleSpec(scale);
+  return {
+    min: Math.min(spec.best, spec.worst),
+    max: Math.max(spec.best, spec.worst),
+    ticks: scale === 'points_0_15' ? [0, 5, 10, 15] : [1, 2, 3, 4, 5, 6],
+    betterIsLower: spec.betterIsLower,
+  };
+}

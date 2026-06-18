@@ -37,6 +37,26 @@ export function useStageTerms(stageId: number | null): Term[] {
   return useLiveQuery(termsForStageQuery(stageId ?? -1), [stageId]).data ?? [];
 }
 
+export interface TermOptionData {
+  id: number;
+  label: string;
+  sub: string;
+}
+
+/** All terms across every stage, labelled with their stage — for the term switcher. */
+export function useTermOptions(): TermOptionData[] {
+  const stages = useLiveQuery(stagesQuery());
+  const terms = useLiveQuery(allTermsQuery());
+  return useMemo(() => {
+    const stageById = new Map((stages.data ?? []).map((s) => [s.id, s]));
+    return (terms.data ?? []).map((t) => ({
+      id: t.id,
+      label: t.label,
+      sub: stageById.get(t.stageId)?.name ?? '',
+    }));
+  }, [stages.data, terms.data]);
+}
+
 /** One overall-average point per term across the whole career, for the trend chart. */
 export function useCareerTrend(): TrendPoint[] {
   const stages = useLiveQuery(stagesQuery());

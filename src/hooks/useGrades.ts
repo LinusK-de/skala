@@ -11,6 +11,7 @@ import {
   gradesForTermQuery,
   subjectQuery,
   subjectsQuery,
+  termsForStageQuery,
   toGradeInput,
   useLiveQuery,
   type Grade,
@@ -23,9 +24,15 @@ import {
   type MeanResult,
   type Scale,
   type SubjectAverageResult,
+  type Tendency,
 } from '@/lib/grades';
 
 import { subjectAverageFor, termOverview, type SubjectWithAverage } from './aggregate';
+
+export interface SubjectTrendPoint {
+  label: string;
+  value: number | null;
+}
 
 const EMPTY: SubjectAverageResult = { kind: 'empty' };
 
@@ -82,4 +89,58 @@ export function useSubjectDetail(
 
     return { subject, categories, allGrades, termGrades, termAverage, overallAverage, forecast };
   }, [subjectRes.data, categoriesRes.data, gradesRes.data, termId, scale]);
+}
+
+/** This subject's average per term across its stage — for the per-subject trend line. */
+export function useSubjectTrend(
+  subjectId: number,
+  stageId: number | null,
+  scale: Scale,
+): SubjectTrendPoint[] {
+  const subjectRes = useLiveQuery(subjectQuery(subjectId), [subjectId]);
+  const categoriesRes = useLiveQuery(categoriesQuery(subjectId), [subjectId]);
+  const gradesRes = useLiveQuery(gradesForSubjectQuery(subjectId), [subjectId]);
+  const termsRes = useLiveQuery(termsForStageQuery(stageId ?? -1), [stageId]);
+
+  return useMemo(() => {
+    const subject = subjectRes.data?.[0];
+    if (!subject) return [];
+    const categories = categoriesRes.data ?? [];
+    const allGrades = gradesRes.data ?? [];
+    return (termsRes.data ?? []).map((t) => {
+      const termGrades = allGrades.filter((g) => g.termId === t.id);
+      const avg = subjectAverageFor(subject, categories, termGrades, scale);
+      return { label: t.label, value: avg.kind === 'value' ? avg.avg : null };
+    });
+  }, [subjectRes.data, categoriesRes.data, gradesRes.data, termsRes.data, scale]);
+}
+
+export interface RecentGrade {
+  id: number;
+  subjectId: number;
+  subjectName: string;
+  value: number;
+  tendency: Tendency | null;
+  date: number;
+}
+
+/** The most recently dated grades of a term, with their subject name. */
+export function useRecentGrades(
+  stageId: number | null,
+  termId: number | null,
+  limit = 3,
+): RecentGrade[] {
+  const grades = useLiveQuery(gradesForTermQuery(termId ?? -1), [termId]);
+  const subjects = useLiveQuery(subjectsQuery(stageId ?? -1), [stageId]);
+  return useMemo(() => {
+    const nameById = new Map((subjects.data ?? []).map((s) => [s.id, s.name]));
+    return (grades.data ?? []).slice(0, limit).map((g) => ({
+      id: g.id,
+      subjectId: g.subjectId,
+      subjectName: nameById.get(g.subjectId) ?? '—',
+      value: g.value,
+      tendency: (g.tendency ?? null) as Tendency | null,
+      date: g.date.getTime(),
+    }));
+  }, [grades.data, subjects.data, limit]);
 }

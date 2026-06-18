@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { StyleSheet, Text } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { Card } from '@/components/Card';
 import { PrimaryButton } from '@/components/PrimaryButton';
@@ -8,18 +8,33 @@ import { typography } from '@/constants/theme';
 import { usePurchase } from '@/hooks/usePurchase';
 import { useTheme } from '@/hooks/useTheme';
 
+const FEATURES = [
+  'Notenverteilung je Fach und Halbjahr',
+  'Fächerübergreifende Prognosen & Was-wäre-wenn',
+  'Alle zukünftigen Pro-Funktionen inklusive',
+];
+
 export default function PaywallScreen() {
   const { colors } = useTheme();
   const { purchasePro, restore } = usePurchase();
   const router = useRouter();
   return (
     <Screen>
-      <Text style={[styles.title, { color: colors.text }]}>Pro freischalten</Text>
+      <Text style={[styles.title, { color: colors.text }]}>Skala Pro</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
-        Einmal kaufen, für immer behalten — kein Abo. Alle Funktionen, lokal auf deinem Gerät.
+        Der komplette Alltag — Fächer, Noten, Schnitte, Ziele, Verlauf und Backup — bleibt für immer
+        kostenlos. Pro schaltet zusätzliche Auswertungen frei.
       </Text>
       <Card>
-        <Text style={[styles.price, { color: colors.text }]}>Einmaliger Kauf</Text>
+        {FEATURES.map((f) => (
+          <View key={f} style={styles.featureRow}>
+            <Text style={[styles.check, { color: colors.positive }]}>✓</Text>
+            <Text style={[styles.feature, { color: colors.text }]}>{f}</Text>
+          </View>
+        ))}
+      </Card>
+      <Card>
+        <Text style={[styles.price, { color: colors.text }]}>Einmaliger Kauf — kein Abo</Text>
         <PrimaryButton
           label="Jetzt freischalten"
           onPress={() => {
@@ -36,8 +51,8 @@ export default function PaywallScreen() {
         />
       </Card>
       <Text style={[styles.note, { color: colors.textMuted }]}>
-        Hinweis: Im Expo-Go-Modus ist der Kauf simuliert. Der echte In-App-Kauf (RevenueCat) wird
-        erst im EAS-Build aktiv — siehe README.
+        Hinweis: In Expo Go ist der Kauf simuliert. Der echte In-App-Kauf wird erst im EAS-Build
+        aktiv — siehe README.
       </Text>
     </Screen>
   );
@@ -46,6 +61,9 @@ export default function PaywallScreen() {
 const styles = StyleSheet.create({
   title: { fontSize: 28, fontWeight: typography.weightSemibold },
   body: { fontSize: 16, lineHeight: 22 },
-  price: { fontSize: 20, fontWeight: typography.weightSemibold },
+  featureRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  check: { fontSize: 16, fontWeight: typography.weightSemibold },
+  feature: { fontSize: 15, flex: 1 },
+  price: { fontSize: 18, fontWeight: typography.weightSemibold },
   note: { fontSize: 13, lineHeight: 18 },
 });
