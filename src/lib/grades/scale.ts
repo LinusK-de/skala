@@ -81,3 +81,10 @@ export function toAveragingValue(scale: Scale, value: number, tendency: Tendency
 export function isBetter(scale: Scale, a: number, b: number): boolean {
   return scaleSpec(scale).betterIsLower ? a < b : a > b;
 }
+
+/** Display label for a single stored mark, e.g. (2, -1) → "2+", (13, null) → "13". */
+export function gradeLabel(value: number, tendency: Tendency | null, scale: Scale): string {
+  if (scale === 'points_0_15') return `${value}`;
+  const suffix = tendency === -1 ? '+' : tendency === 1 ? '-' : '';
+  return `${value}${suffix}`;
+}
