@@ -106,7 +106,16 @@ export default function StageDetailScreen() {
 
   return (
     <View style={[styles.flex, { backgroundColor: colors.background }]}>
-      <Stack.Screen options={{ title: stage.name }} />
+      <Stack.Screen
+        options={{
+          title: stage.name,
+          headerRight: () => (
+            <Pressable onPress={openManage} hitSlop={8}>
+              <Text style={[styles.headerAction, { color: colors.tint }]}>Bearbeiten</Text>
+            </Pressable>
+          ),
+        }}
+      />
       <ScrollView contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 32 }]}>
         <Card>
           <Text style={[styles.stageName, { color: colors.text }]}>{stage.name}</Text>
@@ -165,10 +174,6 @@ export default function StageDetailScreen() {
             onPress={addNextTerm}
           />
         </Card>
-
-        <Pressable onPress={openManage} style={styles.manageBtn}>
-          <Text style={[styles.manageText, { color: colors.textMuted }]}>Abschnitt verwalten</Text>
-        </Pressable>
       </ScrollView>
 
       <Modal
@@ -229,12 +234,7 @@ const styles = StyleSheet.create({
   dotGap: { width: 8, height: 8 },
   rowName: { fontSize: 16, fontWeight: typography.weightMedium },
   dash: { fontSize: 16 },
-  manageBtn: { alignItems: 'center', paddingVertical: 8 },
-  manageText: {
-    fontSize: 14,
-    fontWeight: typography.weightMedium,
-    textDecorationLine: 'underline',
-  },
+  headerAction: { fontSize: 16, fontWeight: typography.weightMedium, marginRight: 4 },
   backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'flex-end' },
   sheet: {
     borderTopLeftRadius: radii.card,

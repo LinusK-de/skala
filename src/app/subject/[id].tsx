@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Card } from '@/components/Card';
 import { DistributionChart } from '@/components/charts/DistributionChart';
 import { TrendChart } from '@/components/charts/TrendChart';
+import { FAB } from '@/components/FAB';
 import { GradeChip } from '@/components/GradeChip';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { LockedCard } from '@/components/Pro';
@@ -127,8 +128,17 @@ export default function SubjectDetailScreen() {
 
   return (
     <View style={[styles.flex, { backgroundColor: colors.background }]}>
-      <Stack.Screen options={{ title: subject.name }} />
-      <ScrollView contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 32 }]}>
+      <Stack.Screen
+        options={{
+          title: subject.name,
+          headerRight: () => (
+            <Pressable onPress={openManage} hitSlop={8}>
+              <Text style={[styles.headerAction, { color: colors.tint }]}>Bearbeiten</Text>
+            </Pressable>
+          ),
+        }}
+      />
+      <ScrollView contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 130 }]}>
         {/* Average + target */}
         <Card>
           <View style={styles.headerRow}>
@@ -321,11 +331,9 @@ export default function SubjectDetailScreen() {
             })
           )}
         </Card>
-
-        <Pressable onPress={openManage} style={styles.manageBtn}>
-          <Text style={[styles.manageText, { color: colors.textMuted }]}>Fach verwalten</Text>
-        </Pressable>
       </ScrollView>
+
+      <FAB label="Note" onPress={() => router.push(`/grade/new?subjectId=${id}`)} />
 
       <Modal
         visible={managing}
@@ -420,12 +428,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   gradeCat: { fontSize: 15, fontWeight: typography.weightMedium },
-  manageBtn: { alignItems: 'center', paddingVertical: 8 },
-  manageText: {
-    fontSize: 14,
-    fontWeight: typography.weightMedium,
-    textDecorationLine: 'underline',
-  },
+  headerAction: { fontSize: 16, fontWeight: typography.weightMedium, marginRight: 4 },
   backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'flex-end' },
   sheet: {
     borderTopLeftRadius: radii.card,

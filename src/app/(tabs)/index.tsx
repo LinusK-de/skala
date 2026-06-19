@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Card } from '@/components/Card';
 import { Sparkline } from '@/components/charts/Sparkline';
+import { EmptyState } from '@/components/EmptyState';
 import { FAB } from '@/components/FAB';
 import { GradeChip } from '@/components/GradeChip';
 import { TermSelector } from '@/components/TermSelector';
@@ -62,6 +63,8 @@ export default function HeuteScreen() {
       : null;
 
   const heroValue = overview.average.kind === 'value' ? overview.average.avg : null;
+  // Subjects exist but no grades yet this term → offer a direct first action.
+  const firstRunNoGrades = heroValue === null && overview.items.length > 0 && recent.length === 0;
 
   return (
     <View style={[styles.flex, { backgroundColor: colors.background }]}>
@@ -75,36 +78,50 @@ export default function HeuteScreen() {
       </View>
 
       <ScrollView contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 130 }]}>
-        <Pressable onPress={() => router.push('/verlauf')}>
+        {firstRunNoGrades ? (
           <Card>
-            <Text style={[styles.label, { color: colors.textMuted }]}>Aktueller Schnitt</Text>
-            <View style={styles.heroRow}>
-              {heroValue === null ? (
-                <Text style={[styles.heroEmpty, { color: colors.textMuted }]}>Kein Schnitt</Text>
-              ) : (
-                <Text
-                  style={[
-                    styles.hero,
-                    { color: sentColor(sentimentFor(heroValue, scale), colors) },
-                  ]}
-                >
-                  {formatNativeAverage(heroValue, scale)}
-                </Text>
-              )}
-              {delta != null && Math.abs(delta) >= 0.05 ? (
-                <Text
-                  style={[styles.delta, { color: delta > 0 ? colors.positive : colors.warning }]}
-                >
-                  {delta > 0 ? '▲' : '▼'} {formatDecimal(Math.abs(delta), 1)}
-                </Text>
-              ) : null}
-            </View>
-            <Text style={[styles.heroSub, { color: colors.textMuted }]}>
-              {stage.name} · {term.label}
-            </Text>
-            <Sparkline values={trend.map((p) => p.normalized)} />
+            <EmptyState
+              title="Noch keine Note"
+              subtitle="Trag deine erste Note ein, dann erscheint hier dein Schnitt."
+              actionLabel="Erste Note eintragen"
+              onAction={() => router.push('/grade/new')}
+            />
           </Card>
-        </Pressable>
+        ) : (
+          <Pressable onPress={() => router.push('/verlauf')}>
+            <Card>
+              <View style={styles.cardHead}>
+                <Text style={[styles.label, { color: colors.textMuted }]}>Aktueller Schnitt</Text>
+                <Text style={[styles.link, { color: colors.tint }]}>Verlauf ›</Text>
+              </View>
+              <View style={styles.heroRow}>
+                {heroValue === null ? (
+                  <Text style={[styles.heroEmpty, { color: colors.textMuted }]}>Kein Schnitt</Text>
+                ) : (
+                  <Text
+                    style={[
+                      styles.hero,
+                      { color: sentColor(sentimentFor(heroValue, scale), colors) },
+                    ]}
+                  >
+                    {formatNativeAverage(heroValue, scale)}
+                  </Text>
+                )}
+                {delta != null && Math.abs(delta) >= 0.05 ? (
+                  <Text
+                    style={[styles.delta, { color: delta > 0 ? colors.positive : colors.warning }]}
+                  >
+                    {delta > 0 ? '▲' : '▼'} {formatDecimal(Math.abs(delta), 1)}
+                  </Text>
+                ) : null}
+              </View>
+              <Text style={[styles.heroSub, { color: colors.textMuted }]}>
+                {stage.name} · {term.label}
+              </Text>
+              <Sparkline values={trend.map((p) => p.normalized)} />
+            </Card>
+          </Pressable>
+        )}
 
         <Card>
           <View style={styles.cardHead}>

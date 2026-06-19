@@ -74,6 +74,15 @@ export default function EditLessonScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+        {draft.subjectId !== null ? (
+          <View style={styles.hwShortcut}>
+            <PrimaryButton
+              label="Hausaufgabe hinzufügen"
+              variant="muted"
+              onPress={() => router.push(`/homework/new?subjectId=${draft.subjectId}`)}
+            />
+          </View>
+        ) : null}
         <LessonFormFields
           subjects={subjects.map((s) => ({ id: s.id, name: s.name }))}
           lockedSubject={false}
@@ -99,6 +108,7 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
   content: { padding: 20, paddingBottom: 32 },
+  hwShortcut: { marginBottom: 18 },
   footer: {
     paddingHorizontal: 20,
     paddingTop: 12,

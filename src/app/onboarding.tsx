@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Card } from '@/components/Card';
@@ -8,6 +8,7 @@ import { PrimaryButton } from '@/components/PrimaryButton';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { radii, typography } from '@/constants/theme';
 import { seedDemoData, setupInitialStage } from '@/db';
+import { useBackup } from '@/hooks/useBackup';
 import { useTheme } from '@/hooks/useTheme';
 import {
   defaultSubjectsFor,
@@ -24,6 +25,7 @@ import { currentSchoolYear, gradeLevels } from '@/lib/school';
 export default function OnboardingScreen() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
+  const { importBackup } = useBackup();
 
   const [step, setStep] = useState(0);
   const [schoolType, setSchoolType] = useState<SchoolType | null>(null);
@@ -100,6 +102,15 @@ export default function OnboardingScreen() {
     seedDemoData();
   };
 
+  // Reinstall recovery: pick a backup file. On success the restore creates stages,
+  // so the RouteGuard moves us straight into the restored app — no extra navigation.
+  const runImport = () => {
+    void importBackup().then((result) => {
+      if (result === 'invalid') Alert.alert('Ungültig', 'Diese Datei ist kein Skala-Backup.');
+      else if (result === 'error') Alert.alert('Fehler', 'Das Backup konnte nicht gelesen werden.');
+    });
+  };
+
   const canContinue = step === 0 ? schoolType !== null : step === 2 ? selected.size > 0 : true;
 
   return (
@@ -149,6 +160,11 @@ export default function OnboardingScreen() {
             <Pressable onPress={startDemo} style={styles.demoInline}>
               <Text style={[styles.demoText, { color: colors.textMuted }]}>
                 Lieber erst mit Beispieldaten ansehen
+              </Text>
+            </Pressable>
+            <Pressable onPress={runImport} style={styles.demoInline}>
+              <Text style={[styles.demoText, { color: colors.textMuted }]}>
+                Schon ein Backup? Importieren
               </Text>
             </Pressable>
           </>
