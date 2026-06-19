@@ -6,7 +6,15 @@
 import { asc, desc, eq, inArray, max } from 'drizzle-orm';
 
 import { db } from './client';
-import { gradeCategories, grades, stages, subjects, terms } from './schema';
+import {
+  gradeCategories,
+  grades,
+  homework,
+  stages,
+  subjects,
+  terms,
+  timetableSlots,
+} from './schema';
 
 export type Stage = typeof stages.$inferSelect;
 export type Term = typeof terms.$inferSelect;
@@ -60,6 +68,9 @@ export function deleteStage(id: number): void {
     if (subjectIds.length > 0) {
       tx.delete(grades).where(inArray(grades.subjectId, subjectIds)).run();
       tx.delete(gradeCategories).where(inArray(gradeCategories.subjectId, subjectIds)).run();
+      // foreign_keys is off — remove the subjects' timetable slots + homework by hand.
+      tx.delete(homework).where(inArray(homework.subjectId, subjectIds)).run();
+      tx.delete(timetableSlots).where(inArray(timetableSlots.subjectId, subjectIds)).run();
     }
     tx.delete(subjects).where(eq(subjects.stageId, id)).run();
     tx.delete(terms).where(eq(terms.stageId, id)).run();

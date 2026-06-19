@@ -8,9 +8,19 @@ import { eq } from 'drizzle-orm';
 
 import { ensureCurrentTerm } from './career';
 import { db } from './client';
-import { gradeCategories, grades, stages, subjects, terms } from './schema';
+import {
+  gradeCategories,
+  grades,
+  homework,
+  stages,
+  subjects,
+  terms,
+  timetableSlots,
+} from './schema';
 
-const BACKUP_VERSION = 1;
+// v2 added the timetable_slots + homework tables. v1 files (without them) still
+// import — the new arrays are treated as empty so old backups never break.
+const BACKUP_VERSION = 2;
 
 interface SerStage {
   id: number;
@@ -69,6 +79,26 @@ interface SerGrade {
   countsTowardAverage: boolean;
   createdAt: number;
 }
+interface SerTimetableSlot {
+  id: number;
+  subjectId: number;
+  weekday: number;
+  period: number;
+  startMin: number | null;
+  endMin: number | null;
+  room: string | null;
+  createdAt: number;
+}
+interface SerHomework {
+  id: number;
+  subjectId: number;
+  title: string;
+  dueAt: number | null;
+  done: boolean;
+  completedAt: number | null;
+  note: string | null;
+  createdAt: number;
+}
 
 export interface BackupData {
   version: number;
@@ -78,6 +108,9 @@ export interface BackupData {
   subjects: SerSubject[];
   categories: SerCategory[];
   grades: SerGrade[];
+  // Optional so a v1 file (which lacks them) still satisfies the shape on import.
+  timetableSlots?: SerTimetableSlot[];
+  homework?: SerHomework[];
 }
 
 const ms = (d: Date | null): number | null => (d ? d.getTime() : null);
@@ -164,15 +197,43 @@ export function serializeDatabase(exportedAt: Date): BackupData {
         countsTowardAverage: g.countsTowardAverage,
         createdAt: g.createdAt.getTime(),
       })),
+    timetableSlots: db
+      .select()
+      .from(timetableSlots)
+      .all()
+      .map((s) => ({
+        id: s.id,
+        subjectId: s.subjectId,
+        weekday: s.weekday,
+        period: s.period,
+        startMin: s.startMin,
+        endMin: s.endMin,
+        room: s.room,
+        createdAt: s.createdAt.getTime(),
+      })),
+    homework: db
+      .select()
+      .from(homework)
+      .all()
+      .map((h) => ({
+        id: h.id,
+        subjectId: h.subjectId,
+        title: h.title,
+        dueAt: ms(h.dueAt),
+        done: h.done,
+        completedAt: ms(h.completedAt),
+        note: h.note,
+        createdAt: h.createdAt.getTime(),
+      })),
   };
 }
 
-/** True when the parsed object has the shape we can restore. */
+/** True when the parsed object has the shape we can restore (v1 or v2). */
 export function isBackupData(value: unknown): value is BackupData {
   if (typeof value !== 'object' || value === null) return false;
   const v = value as Record<string, unknown>;
   return (
-    v.version === BACKUP_VERSION &&
+    (v.version === 1 || v.version === 2) &&
     Array.isArray(v.stages) &&
     Array.isArray(v.terms) &&
     Array.isArray(v.subjects) &&
@@ -186,6 +247,9 @@ const date = (n: number | null): Date | null => (n === null ? null : new Date(n)
 /** Replace ALL data with the backup. Validate BEFORE wiping so a bad file is a no-op. */
 export function restoreDatabase(data: BackupData): void {
   db.transaction((tx) => {
+    // Delete child tables before subjects (foreign_keys is off, so no auto-cascade).
+    tx.delete(homework).run();
+    tx.delete(timetableSlots).run();
     tx.delete(grades).run();
     tx.delete(gradeCategories).run();
     tx.delete(subjects).run();
@@ -225,6 +289,23 @@ export function restoreDatabase(data: BackupData): void {
       tx
         .insert(grades)
         .values({ ...g, date: new Date(g.date), createdAt: new Date(g.createdAt) })
+        .run(),
+    );
+    (data.timetableSlots ?? []).forEach((s) =>
+      tx
+        .insert(timetableSlots)
+        .values({ ...s, createdAt: new Date(s.createdAt) })
+        .run(),
+    );
+    (data.homework ?? []).forEach((h) =>
+      tx
+        .insert(homework)
+        .values({
+          ...h,
+          dueAt: date(h.dueAt),
+          completedAt: date(h.completedAt),
+          createdAt: new Date(h.createdAt),
+        })
         .run(),
     );
 

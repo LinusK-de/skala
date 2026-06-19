@@ -2,14 +2,14 @@
  * Subjects and their grade categories. Creating a subject seeds a sane default
  * category set for the stage's scale (from the pure lib presets). Subjects are
  * SOFT-deleted (archived) by default so historical term averages survive; a hard
- * delete cascades to its categories and grades.
+ * delete cascades to its categories, grades, timetable slots and homework.
  */
 import { and, asc, eq, isNull, max } from 'drizzle-orm';
 
 import { defaultCategoriesFor, type CategoryType, type Scale } from '@/lib/grades';
 
 import { db } from './client';
-import { gradeCategories, grades, subjects } from './schema';
+import { gradeCategories, grades, homework, subjects, timetableSlots } from './schema';
 
 export type Subject = typeof subjects.$inferSelect;
 export type GradeCategory = typeof gradeCategories.$inferSelect;
@@ -100,6 +100,9 @@ export function deleteSubject(id: number): void {
   db.transaction((tx) => {
     tx.delete(grades).where(eq(grades.subjectId, id)).run();
     tx.delete(gradeCategories).where(eq(gradeCategories.subjectId, id)).run();
+    // foreign_keys is off, so the timetable/homework cascade must be done by hand.
+    tx.delete(homework).where(eq(homework.subjectId, id)).run();
+    tx.delete(timetableSlots).where(eq(timetableSlots.subjectId, id)).run();
     tx.delete(subjects).where(eq(subjects.id, id)).run();
   });
 }

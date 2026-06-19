@@ -58,6 +58,29 @@ export {
   type NewGradeInput,
 } from './grades';
 
+// Timetable slots.
+export {
+  listSlots,
+  getSlot,
+  createSlot,
+  updateSlot,
+  deleteSlot,
+  type TimetableSlot,
+  type NewSlotInput,
+} from './timetable';
+
+// Homework.
+export {
+  getHomework,
+  addHomework,
+  updateHomework,
+  setHomeworkDone,
+  deleteHomework,
+  clearCompletedHomework,
+  type Homework,
+  type NewHomeworkInput,
+} from './homework';
+
 // First-run setup.
 export {
   setupInitialStage,
@@ -85,4 +108,6 @@ export {
   allSubjectsQuery,
   allCategoriesQuery,
   allGradesQuery,
+  slotsQuery,
+  homeworkQuery,
 } from './live';
