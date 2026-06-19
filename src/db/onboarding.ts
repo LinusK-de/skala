@@ -7,7 +7,15 @@ import { defaultCategoriesFor, type Scale } from '@/lib/grades';
 import { termLabel } from '@/lib/school';
 
 import { db } from './client';
-import { gradeCategories, grades, stages, subjects, terms } from './schema';
+import {
+  gradeCategories,
+  grades,
+  homework,
+  stages,
+  subjects,
+  terms,
+  timetableSlots,
+} from './schema';
 
 export interface OnboardingSubject {
   name: string;
@@ -171,6 +179,44 @@ const DEMO_SUBJECTS: DemoSubject[] = [
   },
 ];
 
+interface DemoSlot {
+  name: string;
+  weekday: number;
+  period: number;
+  startMin: number;
+  room?: string;
+}
+
+/** A small Mo–Fr week so the demo's Stundenplan tab isn't empty. */
+const DEMO_SLOTS: DemoSlot[] = [
+  { name: 'Mathematik', weekday: 1, period: 1, startMin: 480, room: '204' },
+  { name: 'Deutsch', weekday: 1, period: 2, startMin: 530 },
+  { name: 'Englisch', weekday: 1, period: 3, startMin: 595 },
+  { name: 'Biologie', weekday: 2, period: 1, startMin: 480, room: 'B12' },
+  { name: 'Mathematik', weekday: 2, period: 2, startMin: 530, room: '204' },
+  { name: 'Sport', weekday: 2, period: 4, startMin: 690, room: 'Halle' },
+  { name: 'Deutsch', weekday: 3, period: 1, startMin: 480 },
+  { name: 'Englisch', weekday: 3, period: 2, startMin: 530 },
+  { name: 'Mathematik', weekday: 4, period: 1, startMin: 480, room: '204' },
+  { name: 'Biologie', weekday: 4, period: 2, startMin: 530, room: 'B12' },
+  { name: 'Englisch', weekday: 5, period: 1, startMin: 480 },
+  { name: 'Sport', weekday: 5, period: 2, startMin: 530, room: 'Halle' },
+];
+
+interface DemoHomework {
+  name: string;
+  title: string;
+  dueInDays: number;
+  note?: string;
+}
+
+/** A few homework items (one overdue, one due tomorrow) so the demo shows the flow. */
+const DEMO_HOMEWORK: DemoHomework[] = [
+  { name: 'Englisch', title: 'Vocab Unit 6 lernen', dueInDays: -1 },
+  { name: 'Deutsch', title: 'Lektüre Kapitel 4 lesen', dueInDays: 1, note: 'für die Diskussion' },
+  { name: 'Mathematik', title: 'AB S. 42 Nr. 3–5', dueInDays: 2 },
+];
+
 /** Seed a realistic Realschule (Klasse 9) so the app showcases averages and charts. */
 export function seedDemoData(): number {
   return db.transaction((tx) => {
@@ -217,6 +263,7 @@ export function seedDemoData(): number {
       .returning({ id: terms.id })
       .get();
     const termId: Record<1 | 2, number> = { 1: term1.id, 2: term2.id };
+    const subjectIdByName: Record<string, number> = {};
 
     DEMO_SUBJECTS.forEach((demo, si) => {
       const subj = tx
@@ -232,6 +279,7 @@ export function seedDemoData(): number {
         })
         .returning({ id: subjects.id })
         .get();
+      subjectIdByName[demo.name] = subj.id;
 
       const catIdByBlock: Partial<Record<'written' | 'oral', number>> = {};
       defaultCategoriesFor(scale).forEach((seed, ci) => {
@@ -264,6 +312,35 @@ export function seedDemoData(): number {
           })
           .run();
       });
+    });
+
+    DEMO_SLOTS.forEach((s) => {
+      const subjectId = subjectIdByName[s.name];
+      if (subjectId === undefined) return;
+      tx.insert(timetableSlots)
+        .values({
+          subjectId,
+          weekday: s.weekday,
+          period: s.period,
+          startMin: s.startMin,
+          endMin: s.startMin + 45,
+          room: s.room ?? null,
+        })
+        .run();
+    });
+
+    const DAY = 86_400_000;
+    DEMO_HOMEWORK.forEach((h) => {
+      const subjectId = subjectIdByName[h.name];
+      if (subjectId === undefined) return;
+      tx.insert(homework)
+        .values({
+          subjectId,
+          title: h.title,
+          dueAt: new Date(Date.now() + h.dueInDays * DAY),
+          note: h.note ?? null,
+        })
+        .run();
     });
 
     return stage.id;

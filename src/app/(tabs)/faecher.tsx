@@ -60,12 +60,6 @@ export default function FaecherScreen() {
     <View style={[styles.flex, { backgroundColor: colors.background }]}>
       <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
         <Text style={[styles.heading, { color: colors.text }]}>Fächer</Text>
-        <Pressable
-          onPress={() => setAdding(true)}
-          style={[styles.addBtn, { backgroundColor: colors.surfaceMuted }]}
-        >
-          <Text style={[styles.addBtnText, { color: colors.text }]}>＋ Fach</Text>
-        </Pressable>
       </View>
 
       <ScrollView contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 130 }]}>
@@ -119,7 +113,7 @@ export default function FaecherScreen() {
         )}
       </ScrollView>
 
-      <FAB onPress={() => router.push('/grade/new')} />
+      <FAB label="Fach" onPress={() => setAdding(true)} />
 
       <Modal
         visible={adding}
@@ -172,8 +166,6 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   heading: { fontSize: 32, fontWeight: typography.weightSemibold, letterSpacing: -0.5 },
-  addBtn: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: radii.pill },
-  addBtnText: { fontSize: 14, fontWeight: typography.weightSemibold },
   content: { paddingHorizontal: 20, paddingTop: 4, gap: 16 },
   row: {
     flexDirection: 'row',

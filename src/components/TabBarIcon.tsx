@@ -1,6 +1,6 @@
 import Svg, { Circle, Path, Polyline, Rect } from 'react-native-svg';
 
-export type TabIconName = 'heute' | 'faecher' | 'verlauf' | 'mehr';
+export type TabIconName = 'heute' | 'stundenplan' | 'hausaufgaben' | 'faecher' | 'mehr';
 
 /** Minimal line icons for the tab bar — stroke colour follows the active tint. */
 export function TabBarIcon({ name, color }: { name: TabIconName; color: string }) {
@@ -24,10 +24,20 @@ export function TabBarIcon({ name, color }: { name: TabIconName; color: string }
           <Path d="M5 20.5A1.5 1.5 0 0 1 6.5 19H18" {...common} />
         </>
       ) : null}
-      {name === 'verlauf' ? (
+      {name === 'stundenplan' ? (
         <>
-          <Polyline points="4 15 9 9 13 12 20 5" {...common} />
-          <Path d="M4 19h16" {...common} />
+          <Rect x={3} y={4} width={18} height={17} rx={3} {...common} />
+          <Path d="M3 9h18" {...common} />
+          <Path d="M9 9v12" {...common} />
+          <Path d="M3 15h18" {...common} />
+        </>
+      ) : null}
+      {name === 'hausaufgaben' ? (
+        <>
+          <Polyline points="4 7.5 5.6 9 8 6" {...common} />
+          <Path d="M11 7.5h9" {...common} />
+          <Polyline points="4 14.5 5.6 16 8 13" {...common} />
+          <Path d="M11 14.5h9" {...common} />
         </>
       ) : null}
       {name === 'mehr' ? (

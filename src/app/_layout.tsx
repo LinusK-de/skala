@@ -58,17 +58,24 @@ export default function RootLayout() {
   );
 }
 
-/** Sends a first-run user (no stages yet) to onboarding. Returns nothing visible. */
+/**
+ * Owns the first-run navigation in ONE place, driven by a SINGLE reactive source
+ * of truth — the live stages list. It redirects both ways: into onboarding when
+ * there are no stages, and out of it once a stage exists. Because onboarding no
+ * longer navigates imperatively, there is no second navigator to race the live
+ * query, so the user can never be bounced back into onboarding after finishing.
+ */
 function RouteGuard() {
   const router = useRouter();
   const segments = useSegments();
-  const { data } = useLiveQuery(stagesQuery());
+  const stages = useLiveQuery(stagesQuery()).data;
 
   useEffect(() => {
-    if (data === undefined) return; // still loading
+    if (stages === undefined) return; // still loading
     const inOnboarding = segments[0] === 'onboarding';
-    if (data.length === 0 && !inOnboarding) router.replace('/onboarding');
-  }, [data, segments, router]);
+    if (stages.length === 0 && !inOnboarding) router.replace('/onboarding');
+    else if (stages.length > 0 && inOnboarding) router.replace('/');
+  }, [stages, segments, router]);
 
   return null;
 }
@@ -98,6 +105,7 @@ function ThemedNavigation() {
       >
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="onboarding" options={{ gestureEnabled: false }} />
+        <Stack.Screen name="verlauf" options={{ headerShown: true, title: 'Verlauf' }} />
         <Stack.Screen name="subject/[id]" options={{ headerShown: true, title: 'Fach' }} />
         <Stack.Screen
           name="grade/new"
@@ -112,6 +120,22 @@ function ThemedNavigation() {
           options={{ headerShown: true, presentation: 'modal', title: 'Neuer Abschnitt' }}
         />
         <Stack.Screen name="stage/[id]" options={{ headerShown: true, title: 'Abschnitt' }} />
+        <Stack.Screen
+          name="lesson/new"
+          options={{ headerShown: true, presentation: 'modal', title: 'Stunde hinzufügen' }}
+        />
+        <Stack.Screen
+          name="lesson/[id]"
+          options={{ headerShown: true, presentation: 'modal', title: 'Stunde bearbeiten' }}
+        />
+        <Stack.Screen
+          name="homework/new"
+          options={{ headerShown: true, presentation: 'modal', title: 'Neue Hausaufgabe' }}
+        />
+        <Stack.Screen
+          name="homework/[id]"
+          options={{ headerShown: true, presentation: 'modal', title: 'Hausaufgabe' }}
+        />
         <Stack.Screen
           name="paywall"
           options={{ headerShown: true, presentation: 'modal', title: 'Pro' }}

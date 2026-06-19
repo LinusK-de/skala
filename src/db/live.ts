@@ -7,7 +7,15 @@
 import { and, asc, desc, eq, isNull } from 'drizzle-orm';
 
 import { db } from './client';
-import { gradeCategories, grades, stages, subjects, terms } from './schema';
+import {
+  gradeCategories,
+  grades,
+  homework,
+  stages,
+  subjects,
+  terms,
+  timetableSlots,
+} from './schema';
 
 // The React adapter lives behind the db seam so hooks never import drizzle directly.
 export { useLiveQuery } from 'drizzle-orm/expo-sqlite';
@@ -53,3 +61,10 @@ export const allSubjectsQuery = () => db.select().from(subjects).orderBy(asc(sub
 export const allCategoriesQuery = () => db.select().from(gradeCategories);
 
 export const allGradesQuery = () => db.select().from(grades);
+
+// Whole-table queries for the timetable + homework (the per-student set is small;
+// the hooks scope them to the current stage's subjects in memory).
+export const slotsQuery = () =>
+  db.select().from(timetableSlots).orderBy(asc(timetableSlots.weekday), asc(timetableSlots.period));
+
+export const homeworkQuery = () => db.select().from(homework).orderBy(asc(homework.dueAt));

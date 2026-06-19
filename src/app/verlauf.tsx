@@ -23,6 +23,8 @@ import {
   type Scale,
 } from '@/lib/grades';
 
+// Routed page (reached from the "Heute" average card), not a tab — keeps the daily
+// tabs uncluttered while the full trend lives one tap away with full back context.
 export default function VerlaufScreen() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
@@ -71,11 +73,7 @@ export default function VerlaufScreen() {
 
   return (
     <View style={[styles.flex, { backgroundColor: colors.background }]}>
-      <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
-        <Text style={[styles.heading, { color: colors.text }]}>Verlauf</Text>
-      </View>
-
-      <ScrollView contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 130 }]}>
+      <ScrollView contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 32 }]}>
         <Card>
           <Text style={[styles.cardTitle, { color: colors.text }]}>Notenverlauf</Text>
           <TrendChart
@@ -190,9 +188,7 @@ function SummaryRow({
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  header: { paddingHorizontal: 20, paddingBottom: 8 },
-  heading: { fontSize: 32, fontWeight: typography.weightSemibold, letterSpacing: -0.5 },
-  content: { paddingHorizontal: 20, paddingTop: 4, gap: 16 },
+  content: { paddingHorizontal: 20, paddingTop: 12, gap: 16 },
   cardTitle: { fontSize: 18, fontWeight: typography.weightSemibold, marginBottom: 2 },
   caption: { fontSize: 12, lineHeight: 16 },
   muted: { fontSize: 14, paddingVertical: 6 },

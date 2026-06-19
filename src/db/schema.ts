@@ -154,6 +154,57 @@ export const grades = sqliteTable(
   ],
 );
 
+/**
+ * One recurring lesson in the weekly timetable. Keyed to a subject (so homework
+ * for "Mathe" can find its next lesson). `period` is the Schulstunde (1., 2., …);
+ * `startMin`/`endMin` are optional clock times as minutes from midnight.
+ */
+export const timetableSlots = sqliteTable(
+  'timetable_slots',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    subjectId: integer('subject_id')
+      .notNull()
+      .references(() => subjects.id, { onDelete: 'cascade' }),
+    /** 1 = Montag … 6 = Samstag. */
+    weekday: integer('weekday').notNull(),
+    /** The Schulstunde, 1-based. */
+    period: integer('period').notNull(),
+    /** Optional start/end as minutes from midnight (e.g. 480 = 08:00). */
+    startMin: integer('start_min'),
+    endMin: integer('end_min'),
+    room: text('room'),
+    createdAt: integer('created_at', { mode: 'timestamp_ms' })
+      .notNull()
+      .$defaultFn(() => new Date()),
+  },
+  (t) => [index('timetable_slots_subject_idx').on(t.subjectId)],
+);
+
+/**
+ * A homework item for a subject. `dueAt` is when it is due — usually computed from
+ * the subject's next lesson occurrence, or set manually. `done` survives in the
+ * list (struck through) until cleared, so a student can see what they finished.
+ */
+export const homework = sqliteTable(
+  'homework',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    subjectId: integer('subject_id')
+      .notNull()
+      .references(() => subjects.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    dueAt: integer('due_at', { mode: 'timestamp_ms' }),
+    done: integer('done', { mode: 'boolean' }).notNull().default(false),
+    completedAt: integer('completed_at', { mode: 'timestamp_ms' }),
+    note: text('note'),
+    createdAt: integer('created_at', { mode: 'timestamp_ms' })
+      .notNull()
+      .$defaultFn(() => new Date()),
+  },
+  (t) => [index('homework_subject_idx').on(t.subjectId), index('homework_due_idx').on(t.dueAt)],
+);
+
 // Relations — enable `db.query.*.findMany({ with: … })` for the live-query hooks.
 export const stagesRelations = relations(stages, ({ many }) => ({
   terms: many(terms),
@@ -169,6 +220,16 @@ export const subjectsRelations = relations(subjects, ({ one, many }) => ({
   stage: one(stages, { fields: [subjects.stageId], references: [stages.id] }),
   categories: many(gradeCategories),
   grades: many(grades),
+  timetableSlots: many(timetableSlots),
+  homework: many(homework),
+}));
+
+export const timetableSlotsRelations = relations(timetableSlots, ({ one }) => ({
+  subject: one(subjects, { fields: [timetableSlots.subjectId], references: [subjects.id] }),
+}));
+
+export const homeworkRelations = relations(homework, ({ one }) => ({
+  subject: one(subjects, { fields: [homework.subjectId], references: [subjects.id] }),
 }));
 
 export const gradeCategoriesRelations = relations(gradeCategories, ({ one, many }) => ({
