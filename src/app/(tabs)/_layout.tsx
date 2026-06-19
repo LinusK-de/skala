@@ -24,17 +24,24 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="stundenplan"
+        options={{
+          title: 'Plan',
+          tabBarIcon: ({ color }) => <TabBarIcon name="stundenplan" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="hausaufgaben"
+        options={{
+          title: 'Aufgaben',
+          tabBarIcon: ({ color }) => <TabBarIcon name="hausaufgaben" color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="faecher"
         options={{
           title: 'Fächer',
           tabBarIcon: ({ color }) => <TabBarIcon name="faecher" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="verlauf"
-        options={{
-          title: 'Verlauf',
-          tabBarIcon: ({ color }) => <TabBarIcon name="verlauf" color={color} />,
         }}
       />
       <Tabs.Screen

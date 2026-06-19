@@ -1,4 +1,3 @@
-import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -8,7 +7,7 @@ import { Chip } from '@/components/Chip';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { radii, typography } from '@/constants/theme';
-import { seedDemoData, setSetting, setupInitialStage } from '@/db';
+import { seedDemoData, setupInitialStage } from '@/db';
 import { useTheme } from '@/hooks/useTheme';
 import {
   defaultSubjectsFor,
@@ -25,7 +24,6 @@ import { currentSchoolYear, gradeLevels } from '@/lib/school';
 export default function OnboardingScreen() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
-  const router = useRouter();
 
   const [step, setStep] = useState(0);
   const [schoolType, setSchoolType] = useState<SchoolType | null>(null);
@@ -94,14 +92,12 @@ export default function OnboardingScreen() {
         };
       }),
     });
-    void setSetting('onboarding_done', 'true');
-    router.replace('/');
+    // No imperative navigation: creating the stage lets the single RouteGuard move
+    // us out of onboarding once its live query settles — so we can't bounce back.
   };
 
   const startDemo = () => {
     seedDemoData();
-    void setSetting('onboarding_done', 'true');
-    router.replace('/');
   };
 
   const canContinue = step === 0 ? schoolType !== null : step === 2 ? selected.size > 0 : true;
